@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with n8n</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .chat-container { width: 400px; height: 600px; border: 1px solid #ccc; border-radius: 8px; background-color: white; display: flex; flex-direction: column; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .chat-box { flex-grow: 1; padding: 10px; overflow-y: auto; border-bottom: 1px solid #ccc; }
+        .input-area { display: flex; padding: 10px; }
+        #message-input { flex-grow: 1; border: 1px solid #ccc; border-radius: 16px; padding: 10px; margin-right: 10px; }
+        #send-button { background-color: #007bff; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 18px; }
+        .message { margin-bottom: 10px; padding: 8px 12px; border-radius: 16px; max-width: 70%; }
+        .user { background-color: #007bff; color: white; align-self: flex-end; margin-left: auto; }
+        .bot { background-color: #e9e9eb; color: black; align-self: flex-start; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-box" id="chat-box">
+        <!-- Chat messages will appear here -->
+    </div>
+    <div class="input-area">
+        <input type="text" id="message-input" placeholder="Type a message...">
+        <button id="send-button">→</button>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+
+    // !!! QUAN TRỌNG: Thay thế URL này bằng Webhook URL của bạn từ n8n
+    const N8N_WEBHOOK_URL = 'YOUR_N8N_WEBHOOK_URL_HERE'; 
+
+    // Hàm để gửi tin nhắn
+    async function sendMessage() {
+        const messageText = messageInput.value.trim();
+        if (messageText === '') return;
+
+        // Hiển thị tin nhắn của người dùng
+        addMessage(messageText, 'user');
+        messageInput.value = '';
+
+        // Hiển thị trạng thái "Bot đang trả lời..."
+        const waitingMessage = addMessage('...', 'bot');
+
+        try {
+            // Gửi tin nhắn tới n8n webhook
+            const response = await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: messageText }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const botResponse = await response.json();
+            
+            // Cập nhật tin nhắn chờ bằng câu trả lời thật từ bot
+            // Giả sử n8n trả về JSON có dạng { "reply": "Đây là câu trả lời." }
+            waitingMessage.innerText = botResponse.reply || 'Sorry, I could not process that.';
+
+        } catch (error) {
+            console.error('Error:', error);
+            waitingMessage.innerText = 'Error connecting to the bot.';
+        }
+    }
+
+    // Hàm để thêm tin nhắn vào giao diện chat
+    function addMessage(text, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', sender);
+        messageElement.innerText = text;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight; // Tự động cuộn xuống
+        return messageElement;
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+</script>
+
+</body>
+</html>
