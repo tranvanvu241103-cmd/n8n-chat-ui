@@ -34,7 +34,7 @@
     const sendButton = document.getElementById('send-button');
 
     // !!! QUAN TRỌNG: Thay thế URL này bằng Webhook URL của bạn từ n8n
-    const N8N_WEBHOOK_URL = 'https://dataanalystmrvu.tino.page/webhook-test/4da9af3e-7506-440d-bde0-618ea9c325f8'; 
+    const N8N_WEBHOOK_URL = 'https://dataanalystmrvu.tino.page/webhook/4da9af3e-7506-440d-bde0-618ea9c325f8'; 
 
     // Hàm để gửi tin nhắn
     async function sendMessage() {
@@ -50,7 +50,7 @@
 
         try {
             // Gửi tin nhắn tới n8n webhook
-            const response = await fetch('https://dataanalystmrvu.tino.page/webhook-test/4da9af3e-7506-440d-bde0-618ea9c325f8', {
+            const response = await fetch('https://dataanalystmrvu.tino.page/webhook/4da9af3e-7506-440d-bde0-618ea9c325f8', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
